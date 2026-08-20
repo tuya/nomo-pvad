@@ -1,0 +1,8 @@
+# nomo-pvad 权重校验和
+# 校验方式（在 weights/ 目录下执行）：
+#     shasum -a 256 -c CHECKSUMS.txt
+#
+0acf2f3e75409b172771663fd1bee31af2760dba4e25b1353d2c26726b6412d1  nomo_pvad.pt
+#
+# 版本对照
+#   1.0  2026-08-19  nomo_pvad.pt

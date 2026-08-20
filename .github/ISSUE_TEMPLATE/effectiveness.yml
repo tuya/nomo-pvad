@@ -1,0 +1,41 @@
+name: 效果问题（识别不准 / 误报漏报）
+description: 模型能跑通但判定结果不符合预期
+labels: [effectiveness]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先阅读 README「阈值按场景调」一节。模型输出的是**概率**，
+        判定阈值是部署方按业务选的操作点，默认 0.7 并不适用所有场景。
+  - type: textarea
+    id: expect
+    attributes:
+      label: 期望结果 vs 实际结果
+      description: 哪一段音频、期望判为什么、实际判为什么
+    validations: { required: true }
+  - type: input
+    id: threshold
+    attributes:
+      label: 当前使用的阈值
+      value: "0.7"
+    validations: { required: true }
+  - type: textarea
+    id: probs
+    attributes:
+      label: 逐帧概率输出
+      description: 加 --verbose 跑一遍，粘贴关键片段
+      render: text
+    validations: { required: true }
+  - type: textarea
+    id: scene
+    attributes:
+      label: 使用场景
+      description: 声纹锁 / 多人 turn-taking / 远场 / 噪声环境等；注册音时长与质量
+    validations: { required: true }
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: 已尝试
+      options:
+        - label: 已尝试调整 --threshold
+        - label: 已用自带 examples 验证过基本功能正常

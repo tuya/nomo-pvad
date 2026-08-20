@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 安全漏洞上报
+    url: https://github.com/tuya/nomo-pvad/security/advisories/new
+    about: 请勿公开提交安全漏洞，走私密上报通道
+  - name: 📄 技术报告
+    url: https://model.tuya.com/doc/pvad
+    about: 任务定义、模型架构、训练设置与实测指标
+  - name: 🎧 在线体验 Demo
+    url: https://model.tuya.com/demo/pvad
+    about: 无需本地部署，直接试听效果

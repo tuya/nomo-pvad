@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.DS_Store
+.venv/
+venv/
+*.log
+
+# 内部文档，禁止随开源仓库发布
+*security-audit-report.md
+nomo-pvad-security-audit-report.md
+
+# 仅本地：仓库规范/协作说明，不随开源仓发布
+CLAUDE.md

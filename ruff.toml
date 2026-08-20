@@ -1,0 +1,11 @@
+# lint 只检查真正的错误：pyflakes(F) + pycodestyle 中会导致运行期问题的 E4/E7/E9。
+# 不检查风格偏好（导入排序、类型注解现代化等）——那些通过后续 PR 逐步收紧，
+# 不在开源首发时改动已通过安全评审的源码。
+#
+# ★ 必须显式声明 select：ruff 的「默认规则集」会随版本变化
+#   （0.16 起大幅扩容），不锁死会导致 CI 因 ruff 升级而无故变红。
+target-version = "py39"
+line-length = 120
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
