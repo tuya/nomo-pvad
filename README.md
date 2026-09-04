@@ -7,9 +7,9 @@
 - **输出**：每 160ms chunk 的目标说话人概率 ∈ [0,1]
 - 本包含**推理代码 + 示例音频**（不含训练代码），版本 `1.0`（对应 tag `release-1.0`）。
 
-> 📄 **详细技术报告**（任务定义、逐模块架构与配置、训练设置、延迟与精度实测）：<https://model.tuya.com/doc/pvad>
+> 📄 **详细技术报告**（任务定义、逐模块架构与配置、训练设置、延迟与精度实测）：<https://tuya.com/model/doc/pvad>
 
-> 🎧 **在线体验 Demo**：<https://model.tuya.com/demo/pvad>
+> 🎧 **在线体验 Demo**：<https://tuya.com/model/demo/pvad>
 >
 > ⚠️ 该 demo 在本仓开源基线（**纯模型、无前后处理**）之外，另叠加了大量工程实现，这些不在开源范围内。
 
