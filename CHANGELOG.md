@@ -11,17 +11,13 @@
 
 ## [1.1] - 2026-09-09
 
-### Fixed
-- Publish automatically when dev is merged into master, using VERSION as the release version.
-- Preserve inference failures and validate chunk probabilities without depending on translated CLI messages.
-- Resume interrupted releases without moving existing tags or replacing published assets.
-- Match the changelog version exactly and validate release metadata before creating a tag.
-
 ### Changed
-- Remove automatic CI checks on push and pull requests; development changes are verified locally before pushing.
 - Make English the default README and retain a Chinese README with reciprocal language links.
 - Clarify offline model dependencies and correct the library example.
 - Use English CLI messages and document release merge and branch synchronization steps.
+- Remove automatic CI checks on push and pull requests; development changes are verified locally before pushing.
+- Automatically create an annotated release-X.Y tag from VERSION after merging into master. Existing tags are left unchanged.
+- Limit the release workflow to tagging; it does not create GitHub Releases or upload assets.
 
 ### Model
 - Model weights are unchanged from release-1.0; the existing SHA-256 checksum still applies.

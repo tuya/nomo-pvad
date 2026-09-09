@@ -19,7 +19,7 @@
 - [ ] 提交已 DCO 签名（`git commit -s`）
 - [ ] 提交信息符合 Conventional Commits
 - [ ] 本地已跑通 `ruff check .`
-- [ ] 本地已跑通 `python scripts/smoke_infer.py`
+- [ ] 本地已跑通 `python infer.py --enroll examples/enroll.wav --test examples/test.wav --fast`
 - [ ] **不含**任何内部域名 / IP / 内网链接 / 密钥凭据
 - [ ] **未**将 `torch.load(..., weights_only=True)` 改为 `weights_only=False`
 - [ ] 已更新 `CHANGELOG.md`；发版时同步 `VERSION` 及中英文 README
