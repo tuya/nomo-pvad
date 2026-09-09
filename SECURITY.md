@@ -25,14 +25,14 @@
 | 初步影响评估 | 10 个工作日内 |
 | 修复发布 | 视严重程度，高危目标 30 日内 |
 
-修复发布后我们会在 Release notes 中致谢报告者（如你希望匿名请说明）。
+修复发布后我们会在 CHANGELOG 中致谢报告者（如你希望匿名请说明）。
 
 ## 模型权重安全（重要）
 
 本仓库分发二进制模型权重 `weights/nomo_pvad.pt`。PyTorch 的 `.pt` 文件基于 pickle，
 **加载不受信任的 `.pt` 文件等同于执行任意代码**。因此：
 
-1. **只从官方渠道获取权重**：本仓库 `weights/` 目录，或本仓库 GitHub Releases 的附件。
+1. **只从官方渠道获取权重**：本仓库对应 `release-X.Y` 标签下的 `weights/` 目录。
    不要使用第三方镜像、网盘或转发的权重文件。
 2. **务必校验完整性**：
 
@@ -40,10 +40,10 @@
    cd weights && shasum -a 256 -c CHECKSUMS.txt
    ```
 
-   每个版本的 sha256 同时记录在 `weights/CHECKSUMS.txt` 与对应 Release 的附件中。
+   每个版本的 SHA-256 记录在对应标签下的 `weights/CHECKSUMS.txt`。当前发布流程只创建标签，不上传 Release 附件。
 3. **本项目所有 `torch.load` 均使用 `weights_only=True`**，拒绝 pickle 任意对象反序列化。
    若你 fork 本项目，**请勿改为 `weights_only=False`**——这会重新引入远程代码执行风险。
-   CI 中有专门的检查项拦截该改动。
+   推送前由贡献者和维护者在本地验证；GitHub 不再自动运行 CI 检查。
 4. 从 checkpoint 读取的模型配置 `model_cfg` 走**字段白名单**，防止被篡改的权重文件注入异常架构参数。
 
 ## 非安全问题

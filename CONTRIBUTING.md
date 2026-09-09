@@ -89,6 +89,8 @@ git commit -s -m "fix(infer): handle audio shorter than one chunk"
 
 ## 版本与发版
 
+维护者可按 [GitHub 发布操作手册](RELEASING.md) 中的命令直接执行。
+
 版本号两段 `X.Y`，对应 tag `release-X.Y`：
 
 - **X**：破坏性变更（Python API 不兼容，或旧权重无法被新代码加载）

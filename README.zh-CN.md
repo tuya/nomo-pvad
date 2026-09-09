@@ -118,3 +118,7 @@ examples/          示例音频（enroll.wav + test.wav）
 - **ERes2NetV2 声纹骨干**：来自 [3D-Speaker / modelscope](https://github.com/modelscope/3D-Speaker)（`iic/speech_eres2netv2_sv_zh-cn_16k-common`），上游声明为 Apache-2.0。
   - `weights/nomo_pvad.pt` 中**包含由该骨干微调而来的权重**（去除末端 pooling 层、在本任务上全参微调），属其衍生作品，依 Apache-2.0 再分发并在此署名。
   - **注册侧**使用的是未经修改的完整原始模型（含 pooling），本仓不打包，首次运行时从 modelscope 自动下载。
+
+## 发布流程
+
+维护者操作步骤见 [GitHub 发布操作手册](RELEASING.md)。版本通过 Git 标签发布，工作流不创建 GitHub Release 页面或上传附件。
