@@ -12,12 +12,13 @@
 ## [1.1] - 2026-09-09
 
 ### Fixed
-- Make releases depend on successful lint, source checks, metadata validation, and inference for the same commit.
+- Publish automatically when dev is merged into master, using VERSION as the release version.
 - Preserve inference failures and validate chunk probabilities without depending on translated CLI messages.
 - Resume interrupted releases without moving existing tags or replacing published assets.
-- Require an exact changelog version match and a version increase before merging a release PR.
+- Match the changelog version exactly and validate release metadata before creating a tag.
 
 ### Changed
+- Remove automatic CI checks on push and pull requests; development changes are verified locally before pushing.
 - Make English the default README and retain a Chinese README with reciprocal language links.
 - Clarify offline model dependencies and correct the library example.
 - Use English CLI messages and document release merge and branch synchronization steps.

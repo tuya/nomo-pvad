@@ -25,7 +25,7 @@ def publish(root, repository, sha):
     if os.environ.get("GITHUB_REF") != "refs/heads/master":
         raise ValueError("Releases can only be published from master")
     if run("git", "rev-parse", "HEAD") != sha:
-        raise ValueError("Checkout does not match the commit that passed CI")
+        raise ValueError("Checkout does not match the release commit")
     remote = run("git", "ls-remote", "origin", "refs/heads/master").split()
     if not remote or remote[0] != sha:
         raise ValueError("master advanced; run the release workflow for its current commit")

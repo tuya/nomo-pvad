@@ -13,12 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  checks:
-    if: github.ref == 'refs/heads/master'
-    uses: ./.github/workflows/ci.yml
-
   tag-and-release:
-    needs: checks
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 15
