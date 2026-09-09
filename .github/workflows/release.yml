@@ -6,27 +6,36 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  tag-and-release:
+  tag-release:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Publish or resume verified release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python scripts/publish_release.py
+      - name: Create release tag if missing
+        run: |
+          VERSION_VALUE="$(cat VERSION)"
+          if [[ ! "$VERSION_VALUE" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::VERSION must contain X.Y"
+            exit 1
+          fi
+          RELEASE_TAG="release-$VERSION_VALUE"
+          if git rev-parse -q --verify "refs/tags/$RELEASE_TAG" >/dev/null; then
+            echo "$RELEASE_TAG already exists; leaving it unchanged."
+            echo "$RELEASE_TAG already exists; no tag was moved." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "nomo-pvad $VERSION_VALUE"
+          git push origin "refs/tags/$RELEASE_TAG"
+          echo "Created $RELEASE_TAG at $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"

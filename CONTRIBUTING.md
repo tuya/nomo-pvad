@@ -14,12 +14,12 @@
 
 | 分支 | 定位 |
 |---|---|
-| `master` | **默认分支**。发布分支；合入后自动打 tag 并发布 Release |
+| `master` | **默认分支**。发布分支；合入后自动打 tag |
 | `dev` | 集成分支。所有开发在此汇聚 |
 
 ```
 feat/xxx ──┐
-fix/xxx  ──┼── PR ──► dev ── PR(release) ──► master ──自动──► tag release-X.Y + Release
+fix/xxx  ──┼── PR ──► dev ── PR(release) ──► master ──自动──► tag release-X.Y
 docs/xxx ──┘
 ```
 
@@ -73,9 +73,7 @@ git commit -s -m "fix(infer): handle audio shorter than one chunk"
 2. 本地跑通：
    ```bash
    ruff check .
-   python scripts/smoke_infer.py
-   python scripts/check_release.py
-   python -m unittest discover -s tests -v
+   python infer.py --enroll examples/enroll.wav --test examples/test.wav --fast
    ```
 3. 提 PR 到 `dev`，填写 PR 模板中的检查项；
 4. 推送前在本地完成验证；GitHub 不再重复运行 lint、扫描或推理检查，维护者 review 后合并；
@@ -98,19 +96,18 @@ git commit -s -m "fix(infer): handle audio shorter than one chunk"
 
 发版由维护者操作：
 
-1. 在 `dev` 准备变更，同步更新 `VERSION`、`CHANGELOG.md`、`README.md` 和 `README.zh-CN.md`。英文为默认 README，两份文档须保留相互跳转的语言链接。
-2. 仅当权重变化时更新 `weights/CHECKSUMS.txt`，并在 CHANGELOG 的 `### Model` 中说明指标和阈值影响。
-3. 将 `dev` 合并到 `master`，可通过 release PR 或维护者本地合并后推送。推送前本地验证版本高于目标分支及已有正式标签，CHANGELOG 须精确匹配该版本。
-4. 使用 **Merge commit** 合入。`release.yml` 不运行开发 CI，只校验发布元数据及权重一致性，然后创建 tag 和 Release 草稿。
-5. 自动上传权重和校验和，下载两份附件并核对字节内容，成功后公开 Release。
-6. 核实 tag 指向本次合并提交、两份附件与仓库一致，以及双语文档链接可用。
-7. 将 `master` 合回 `dev`（直接快进或通过同步 PR 的 Merge commit，依分支保护设置操作）。
+1. 在本地验证改动，然后推送到 `dev`；GitHub 不重复运行 lint、扫描或推理检查。
+2. 准备新版本时同步更新 `VERSION`、`CHANGELOG.md`、`README.md` 和 `README.zh-CN.md`。英文为默认 README，两份文档保留语言切换链接。
+3. 仅当权重变化时更新 `weights/CHECKSUMS.txt`，并在 CHANGELOG 的 `### Model` 中说明指标和阈值影响。
+4. 使用 Merge commit 将 `dev` 合并到 `master`，可通过 PR 或维护者本地合并后推送。
+5. `release.yml` 读取 `VERSION`，自动在该提交上创建 annotated tag `release-X.Y`。标签已存在则成功跳过，绝不移动或删除已有标签。
+6. 核实标签指向预期发布提交，然后将 `master` 合回 `dev`。
 
-**贡献者与维护者都不要手动打 tag，不得移动或删除已发布标签。**
+工作流只负责打 tag，不创建 GitHub Release 页面或上传附件。源码、权重和文档均保留在对应标签的仓库内容中。
 
-若发布中断，在 Actions 中对 `master` 重新运行 `release` 工作流。已有 tag 必须指向本次发布提交；工作流会补建缺少的 Release、补传缺少的附件。已有附件必须与当前提交一致，否则停止并要求人工排查，不覆盖附件。已有完整 Release 仅校验，不重复发布。若 `master` 已推进，应运行当前提交的工作流；版本对应的 tag 已指向其他提交时必须递增版本。
+新版本必须递增 `VERSION`；版本号未变时不会创建新标签。可在 Actions 对 `master` 手动重新运行 `release`，已有标签保持不变。
 
-若分支保护仍要求已删除的 `lint`、`no-internal-refs`、`smoke-infer`，应移除这些必需检查，避免 PR 永久等待。可保留 PR 规则；维护者直接推送须符合仓库权限设置。release PR 使用 Merge commit，不能要求线性历史。
+若分支保护仍要求已删除的 `lint`、`no-internal-refs`、`smoke-infer`，应移除这些必需检查，避免 PR 永久等待。维护者直接推送须符合仓库权限设置；使用 Merge commit 时不能要求线性历史。
 
 ## 行为准则
 
