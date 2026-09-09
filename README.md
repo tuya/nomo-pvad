@@ -116,3 +116,7 @@ stream ─► Fbank ─► ERes2NetV2 trunk ─► FiLM ─► proj ─► speec
 - **ERes2NetV2 speaker backbone**: from [3D-Speaker / ModelScope](https://github.com/modelscope/3D-Speaker) (`iic/speech_eres2netv2_sv_zh-cn_16k-common`), declared Apache-2.0 upstream.
   - `weights/nomo_pvad.pt` **contains weights fine-tuned from that backbone** (final pooling removed, all parameters fine-tuned for this task) — a derivative work, redistributed under Apache-2.0 with attribution here.
   - The **enrollment side** uses the unmodified original full model (with pooling); it is not bundled and downloads automatically from ModelScope on first run.
+
+## Release process
+
+For maintainer instructions, see [Releasing](RELEASING.md) (in Chinese). Releases use Git tags; the workflow does not create GitHub Release pages or upload assets.
