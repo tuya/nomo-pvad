@@ -15,14 +15,14 @@
 
 ## 检查项
 
-- [ ] PR 提向 `dev` 分支（**不是** `master`）
+- [ ] 普通 PR 提向 `dev`；维护者 release PR 为 `dev` → `master`，使用 Merge commit
 - [ ] 提交已 DCO 签名（`git commit -s`）
 - [ ] 提交信息符合 Conventional Commits
 - [ ] 本地已跑通 `ruff check .`
-- [ ] 本地已跑通 `python infer.py --enroll examples/enroll.wav --test examples/test.wav --fast`
+- [ ] 本地已跑通 `python scripts/smoke_infer.py`
 - [ ] **不含**任何内部域名 / IP / 内网链接 / 密钥凭据
 - [ ] **未**将 `torch.load(..., weights_only=True)` 改为 `weights_only=False`
-- [ ] 已更新 `CHANGELOG.md` 的 `[Unreleased]` 小节
+- [ ] 已更新 `CHANGELOG.md`；发版时同步 `VERSION` 及中英文 README
 
 ## 若变更了模型权重，请补充
 

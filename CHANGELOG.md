@@ -9,6 +9,23 @@
 
 ## [Unreleased]
 
+## [1.1] - 2026-09-09
+
+### Fixed
+- Make releases depend on successful lint, source checks, metadata validation, and inference for the same commit.
+- Preserve inference failures and validate chunk probabilities without depending on translated CLI messages.
+- Resume interrupted releases without moving existing tags or replacing published assets.
+- Require an exact changelog version match and a version increase before merging a release PR.
+
+### Changed
+- Make English the default README and retain a Chinese README with reciprocal language links.
+- Clarify offline model dependencies and correct the library example.
+- Use English CLI messages and document release merge and branch synchronization steps.
+
+### Model
+- Model weights are unchanged from release-1.0; the existing SHA-256 checksum still applies.
+- No change to model behavior or recommended decision thresholds; no threshold recalibration is required.
+
 ## [1.0] - 2026-08-19
 
 首个公开发布版本。
@@ -32,5 +49,7 @@
 - 从 checkpoint 读取的 `model_cfg` 走字段白名单，防配置注入。
 - `requirements.txt` 全部依赖锁定版本范围。
 
-[Unreleased]: https://github.com/tuya/nomo-pvad/compare/release-1.0...HEAD
+[Unreleased]: https://github.com/tuya/nomo-pvad/compare/release-1.1...HEAD
 [1.0]: https://github.com/tuya/nomo-pvad/releases/tag/release-1.0
+
+[1.1]: https://github.com/tuya/nomo-pvad/compare/release-1.0...release-1.1

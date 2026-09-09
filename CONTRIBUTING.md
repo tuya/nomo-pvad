@@ -14,7 +14,7 @@
 
 | 分支 | 定位 |
 |---|---|
-| `master` | **默认分支**。始终等于最新可发布版本，合入即自动发版 |
+| `master` | **默认分支**。发布分支；合入后须通过同一提交的 CI 才自动发版 |
 | `dev` | 集成分支。所有开发在此汇聚 |
 
 ```
@@ -73,11 +73,14 @@ git commit -s -m "fix(infer): handle audio shorter than one chunk"
 2. 本地跑通：
    ```bash
    ruff check .
-   python infer.py --enroll examples/enroll.wav --test examples/test.wav --fast
+   python scripts/smoke_infer.py
+   python scripts/check_release.py
+   python -m unittest discover -s tests -v
    ```
 3. 提 PR 到 `dev`，填写 PR 模板中的检查项；
 4. 需要 CI 三个检查项全绿（`lint`、`no-internal-refs`、`smoke-infer`）；维护者会 review 后合并；
-5. 合并方式为 **Squash and merge**，squash 后的标题需符合 Conventional Commits。
+5. 短期分支 → `dev` 使用 **Squash and merge**，squash 后的标题需符合 Conventional Commits。
+6. 维护者的 `dev` → `master` release PR 使用 **Merge commit**；发布验收后将 `master` 合回 `dev`，保留共同历史。
 
 ### 请勿在 PR 中包含
 
@@ -93,8 +96,21 @@ git commit -s -m "fix(infer): handle audio shorter than one chunk"
 - **X**：破坏性变更（Python API 不兼容，或旧权重无法被新代码加载）
 - **Y**：其余一切变更，**包括 bug 修复**（不设 patch 段，1.0 之后的修复即 1.1）
 
-发版由维护者操作：更新 `VERSION` 与 `CHANGELOG.md` → 提 `dev` → `master` 的 release PR →
-合入后 CI 自动打 tag 并创建 Release。**贡献者与维护者都不要手动打 tag。**
+发版由维护者操作：
+
+1. 在 `dev` 准备变更，同步更新 `VERSION`、`CHANGELOG.md`、`README.md` 和 `README.zh-CN.md`。英文为默认 README，两份文档须保留相互跳转的语言链接。
+2. 仅当权重变化时更新 `weights/CHECKSUMS.txt`，并在 CHANGELOG 的 `### Model` 中说明指标和阈值影响。
+3. 提 `dev` → `master` 的 release PR。CI 必须全绿；版本必须高于目标分支和已有正式标签，CHANGELOG 必须精确匹配该版本。
+4. 使用 **Merge commit** 合入。`release.yml` 先复用 CI，全部通过后才允许创建 tag 和 Release 草稿。
+5. 自动上传权重和校验和，下载两份附件并核对字节内容，成功后公开 Release。
+6. 核实 tag 指向本次合并提交、两份附件与仓库一致，以及双语文档链接可用。
+7. 将 `master` 合回 `dev`（直接快进或通过同步 PR 的 Merge commit，依分支保护设置操作）。
+
+**贡献者与维护者都不要手动打 tag，不得移动或删除已发布标签。**
+
+若发布中断，在 Actions 中对 `master` 重新运行 `release` 工作流。已有 tag 必须指向本次通过检查的提交；工作流会补建缺少的 Release、补传缺少的附件。已有附件必须与当前提交一致，否则停止并要求人工排查，不覆盖附件。已有完整 Release 仅校验，不重复发布。若 `master` 已推进，应运行当前提交的工作流；版本对应的 tag 已指向其他提交时必须递增版本。
+
+仓库管理员应在 `master` 分支保护中要求 PR 和 `lint`、`no-internal-refs`、`smoke-infer` 检查通过。单人维护时不要求本人批准自己的 PR；release PR 需要 Merge commit，因此不能要求线性历史。
 
 ## 行为准则
 

@@ -4,13 +4,14 @@ on:
   pull_request:
     branches: [master, dev]
   push:
-    branches: [master, dev]
+    branches: [dev]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -20,6 +21,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -28,6 +31,18 @@ jobs:
       - run: pip install ruff==0.16.3
       - name: ruff check
         run: ruff check --output-format=github .
+      - name: Release automation regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate release metadata
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$BASE_REF" = master ]; then
+            python scripts/check_release.py --base-ref "$BASE_SHA"
+          else
+            python scripts/check_release.py
+          fi
 
   no-internal-refs:
     name: no-internal-refs
@@ -38,7 +53,11 @@ jobs:
       - name: 扫描内部信息泄漏（全部文件）
         run: |
           PATTERN='tuya-inc|registry\.code|wgine\.com/[0-9a-f]{16,}|BEGIN [A-Z ]*PRIVATE KEY|10\.[0-9]+\.[0-9]+\.[0-9]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+'
-          if git grep -InE "$PATTERN" -- ':!.github/workflows/ci.yml'; then
+          set +e
+          git grep -InE "$PATTERN" -- ':!.github/workflows/ci.yml'
+          scan_status=$?
+          set -e
+          if [ "$scan_status" -ne 1 ]; then
             echo "::error::检测到内部域名/IP/密钥，见上方命中行"
             exit 1
           fi
@@ -47,7 +66,11 @@ jobs:
       # 只扫 Python 源码：文档中会正当引用 weights_only=False 作为禁令，不能一并拦截
       - name: 禁止 weights_only=False（仅 *.py）
         run: |
-          if git grep -InE 'weights_only\s*=\s*False' -- '*.py'; then
+          set +e
+          git grep -InE 'weights_only[[:space:]]*=[[:space:]]*False' -- '*.py'
+          scan_status=$?
+          set -e
+          if [ "$scan_status" -ne 1 ]; then
             echo "::error::torch.load 必须使用 weights_only=True，禁止 False（pickle 反序列化 RCE）"
             exit 1
           fi
@@ -83,16 +106,4 @@ jobs:
         run: shasum -a 256 -c CHECKSUMS.txt
 
       - name: 冒烟推理
-        run: |
-          python infer.py \
-            --enroll examples/enroll.wav \
-            --test examples/test.wav \
-            --fast --verbose | tee out.txt
-          grep -q '结论：' out.txt || { echo "::error::推理未输出结论行"; exit 1; }
-
-      - name: 校验 VERSION 格式
-        run: |
-          V="$(tr -d '[:space:]' < VERSION)"
-          echo "$V" | grep -qE '^[0-9]+\.[0-9]+$' \
-            || { echo "::error::VERSION 必须为 X.Y，实际 '$V'"; exit 1; }
-          echo "VERSION = $V"
+        run: python scripts/smoke_infer.py

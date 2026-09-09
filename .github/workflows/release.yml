@@ -1,81 +1,37 @@
 name: release
 
-# 合入 master 即发版：读 VERSION → 打 tag release-X.Y → 建 GitHub Release。
-# 幂等：tag 已存在则跳过，可安全重跑。
 on:
   push:
     branches: [master]
-  workflow_dispatch:        # 允许手动补跑（例如上次因权限失败）
+  workflow_dispatch:
 
 permissions:
-  contents: write           # 推 tag、建 Release 必需
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
+  checks:
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/ci.yml
+
   tag-and-release:
+    needs: checks
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # 需要完整 tag 列表来判重
-
-      - id: v
-        name: 读取并校验 VERSION
-        run: |
-          V="$(tr -d '[:space:]' < VERSION)"
-          echo "$V" | grep -qE '^[0-9]+\.[0-9]+$' \
-            || { echo "::error::VERSION 必须为 X.Y 格式（两段），实际 '$V'"; exit 1; }
-          echo "version=$V"     >> "$GITHUB_OUTPUT"
-          echo "tag=release-$V" >> "$GITHUB_OUTPUT"
-          echo "本次版本：$V → tag release-$V" >> "$GITHUB_STEP_SUMMARY"
-
-      - id: check
-        name: tag 已存在则跳过
-        run: |
-          if git rev-parse -q --verify "refs/tags/${{ steps.v.outputs.tag }}" >/dev/null; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "⏭ tag ${{ steps.v.outputs.tag }} 已存在，跳过发版" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - if: steps.check.outputs.exists == 'false'
-        name: 校验权重与 CHANGELOG 已同步更新
-        run: |
-          ( cd weights && shasum -a 256 -c CHECKSUMS.txt )
-          grep -qE "^## \[?${{ steps.v.outputs.version }}\]?" CHANGELOG.md \
-            || { echo "::error::CHANGELOG.md 缺少 ## [${{ steps.v.outputs.version }}] 小节"; exit 1; }
-
-      - if: steps.check.outputs.exists == 'false'
-        name: 抽取本版 Release notes
-        run: |
-          awk -v v="${{ steps.v.outputs.version }}" '
-            $0 ~ "^## \\[?"v"\\]?" {f=1; next}
-            f && /^## /            {exit}
-            f                      {print}
-          ' CHANGELOG.md > RELEASE_NOTES.md
-          [ -s RELEASE_NOTES.md ] || echo "详见 CHANGELOG.md" > RELEASE_NOTES.md
-          cat RELEASE_NOTES.md
-
-      # 注意：GITHUB_TOKEN 推送的 tag 不会触发其他 workflow，
-      # 因此打 tag 与建 Release 必须在同一个 job 内完成，不可拆成两个 workflow。
-      - if: steps.check.outputs.exists == 'false'
-        name: 打 tag 并建 Release
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Publish or resume verified release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.v.outputs.tag }}" \
-                  -m "nomo-pvad ${{ steps.v.outputs.version }}"
-          git push origin "${{ steps.v.outputs.tag }}"
-          gh release create "${{ steps.v.outputs.tag }}" \
-            --title      "nomo-pvad ${{ steps.v.outputs.version }}" \
-            --notes-file RELEASE_NOTES.md \
-            weights/nomo_pvad.pt \
-            weights/CHECKSUMS.txt
-          echo "✅ 已发布 ${{ steps.v.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
+        run: python scripts/publish_release.py
